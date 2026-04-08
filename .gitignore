@@ -3,3 +3,6 @@ __pycache__/
 .venv/
 reports/
 .worktrees/
+apps/desktop/node_modules/
+apps/desktop/dist/
+apps/desktop/src-tauri/target/

@@ -5,9 +5,9 @@
 [![Frontend](https://img.shields.io/badge/frontend-React-61dafb.svg)](#)
 [![Backend](https://img.shields.io/badge/backend-Rust-dea584.svg)](#)
 [![License: MIT](https://img.shields.io/badge/license-MIT-yellow.svg)](./LICENSE)
-[![Status](https://img.shields.io/badge/status-planning%20%2B%20prototype-orange.svg)](#)
+[![Status](https://img.shields.io/badge/status-v1%20usable-blue.svg)](#)
 
-Git Daily Reporter 是一个正在落地的跨平台桌面客户端，用来把 Git 仓库活动自动整理成日报、周报和其他可定制总结。
+Git Daily Reporter 是一个可试用的跨平台桌面客户端，用来把 Git 仓库活动自动整理成日报和 AI 增强总结。
 
 当前产品方向已经收敛为：
 
@@ -40,27 +40,20 @@ git-daily-reporter/
 - `docs/` 是单一真相来源
 - `prototypes/python-cli/` 保留原型验证成果，但不再代表正式架构
 
-## 当前状态
+## 当前 V1 能力
 
-目前仓库包含两部分：
+当前版本已经可以：
 
-### 1. 正式文档
-
-已经完成：
-
-- 客户端总体方案设计
-- 详细技术设计
-- 按版本执行计划
-- 实施路线和坑点分析
-
-### 2. Python CLI 原型归档
-
-它用于证明以下链路可行：
-
-- Git 活动采集
-- 模板渲染
-- Markdown 报告输出
-- 基础测试
+- 启动桌面应用
+- 切换中英文
+- 配置账户 / 凭证 / 仓库
+- 使用保险库保存敏感信息
+- 生成基于本地 Git 仓库的日报
+- 生成包含作者过滤和文件统计的 Markdown 报告
+- 配置 LLM 提供方
+- 测试 LLM 提供方连接
+- 生成 AI summary
+- 查看最近报告历史
 
 ## 项目路线
 
@@ -81,22 +74,27 @@ Python CLI 仅作为参考实现，不作为最终桌面客户端架构。
 - 客户端实施计划: [实施计划.md](/home/qstdc/Royin_Project/git-daily-reporter/docs/实施计划.md)
 - 按版本执行计划: [版本执行计划.md](/home/qstdc/Royin_Project/git-daily-reporter/docs/版本执行计划.md)
 - 开发环境建议: [开发环境建议.md](/home/qstdc/Royin_Project/git-daily-reporter/docs/开发环境建议.md)
+- 桌面端工作区说明: [apps/desktop/README.md](/home/qstdc/Royin_Project/git-daily-reporter/.worktrees/phase-v0-2-desktop-init/apps/desktop/README.md)
 
-## 原型归档
+## 启动方式
 
-当前归档原型已实现：
+```bash
+cd /home/qstdc/Royin_Project/git-daily-reporter/.worktrees/phase-v0-2-desktop-init/apps/desktop
+npm install
+npm run tauri dev
+```
 
-- YAML 配置读取
-- 指定日期采集 Git 提交
-- 文件增删统计
-- Jinja2 模板渲染
-- Markdown 日报生成
+## 推荐使用流程
 
-相关文件：
-
-- [cli.py](/home/qstdc/Royin_Project/git-daily-reporter/prototypes/python-cli/src/git_daily_reporter/cli.py)
-- [collector.py](/home/qstdc/Royin_Project/git-daily-reporter/prototypes/python-cli/src/git_daily_reporter/collector.py)
-- [template_engine.py](/home/qstdc/Royin_Project/git-daily-reporter/prototypes/python-cli/src/git_daily_reporter/template_engine.py)
+1. 解锁保险库
+2. 创建账户
+3. 创建凭证
+4. 创建仓库并填写真实本地 Git 仓库路径
+5. 生成日报
+6. 配置 LLM 提供方
+7. 测试连接
+8. 保存并激活提供方
+9. 生成 AI summary
 
 ## 推荐 IDE
 
@@ -115,13 +113,12 @@ Python CLI 仅作为参考实现，不作为最终桌面客户端架构。
 
 本项目当前使用 [MIT License](/home/qstdc/Royin_Project/git-daily-reporter/LICENSE)。
 
-## 下一步
+## 当前边界
 
-项目应当严格按 [版本执行计划.md](/home/qstdc/Royin_Project/git-daily-reporter/docs/版本执行计划.md) 推进。
+当前版本更适合：
 
-当前应执行的下一步是：
+- 个人开发者
+- 以本地 Git 仓库为主的日报生成
+- API 形式接入外部 LLM
 
-1. 完成仓库规范化
-2. 初始化 `apps/desktop/` 的 Tauri 工程
-3. 建立数据模型和设置页骨架
-4. 再进入凭证、安全和 Git 访问层
+后续增强方向见 [版本执行计划.md](/home/qstdc/Royin_Project/git-daily-reporter/docs/版本执行计划.md)。
