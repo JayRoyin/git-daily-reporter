@@ -1,0 +1,7 @@
+timezone: Asia/Shanghai
+repos:
+  - name: demo
+    path: /absolute/path/to/your/repo
+    branch: HEAD
+    template: templates/daily_report.md.j2
+    output_dir: reports

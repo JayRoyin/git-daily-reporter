@@ -1,0 +1,38 @@
+# {{ report_date }} 工作日报
+
+项目: {{ repo_name }}
+分支: {{ branch }}
+
+## 今日完成
+{% if done_items %}
+{% for item in done_items %}
+- {{ item }}
+{% endfor %}
+{% else %}
+- 今日无提交记录
+{% endif %}
+
+## 变更统计
+
+- 提交数: {{ commit_count }}
+- 文件数: {{ changed_file_count }}
+- 新增行数: {{ total_additions }}
+- 删除行数: {{ total_deletions }}
+
+## 重点文件
+{% if changed_files %}
+{% for item in changed_files %}
+- `{{ item.path }}` (+{{ item.additions }} / -{{ item.deletions }})
+{% endfor %}
+{% else %}
+- 无文件变更
+{% endif %}
+
+## 明日计划
+{% if tomorrow_items %}
+{% for item in tomorrow_items %}
+- {{ item }}
+{% endfor %}
+{% else %}
+- 待补充
+{% endif %}
