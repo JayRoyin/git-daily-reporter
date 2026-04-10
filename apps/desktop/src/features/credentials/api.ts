@@ -5,7 +5,8 @@ export interface SaveCredentialPayload {
   displayName: string;
   credentialType: string;
   usernameHint: string;
-  secretRef: string;
+  secretValue: string;
+  sourcePath?: string;
 }
 
 export async function saveCredential(payload: SaveCredentialPayload) {

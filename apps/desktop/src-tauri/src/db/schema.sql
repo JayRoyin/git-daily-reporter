@@ -1,10 +1,14 @@
 CREATE TABLE IF NOT EXISTS accounts (
   id TEXT PRIMARY KEY,
   platform TEXT NOT NULL,
+  platform_base_url TEXT,
   display_name TEXT NOT NULL,
   git_username TEXT NOT NULL,
   git_email TEXT NOT NULL,
   default_auth_type TEXT NOT NULL,
+  verification_status TEXT NOT NULL DEFAULT 'unverified',
+  verification_message TEXT,
+  last_verified_at TEXT,
   created_at TEXT NOT NULL,
   updated_at TEXT NOT NULL
 );
@@ -15,8 +19,11 @@ CREATE TABLE IF NOT EXISTS credentials (
   type TEXT NOT NULL,
   display_name TEXT NOT NULL,
   secret_ref TEXT NOT NULL,
+  secret_mask TEXT NOT NULL DEFAULT '',
+  source_path TEXT,
   username_hint TEXT,
   last_verified_at TEXT,
+  verification_status TEXT NOT NULL DEFAULT 'unverified',
   is_active INTEGER NOT NULL DEFAULT 1,
   created_at TEXT NOT NULL,
   updated_at TEXT NOT NULL
@@ -51,6 +58,9 @@ CREATE TABLE IF NOT EXISTS llm_providers (
   base_url TEXT NOT NULL,
   model TEXT NOT NULL,
   api_key_ref TEXT NOT NULL,
+  api_key_mask TEXT NOT NULL DEFAULT '',
+  last_tested_at TEXT,
+  test_status TEXT NOT NULL DEFAULT 'unverified',
   is_active INTEGER NOT NULL DEFAULT 0,
   created_at TEXT NOT NULL,
   updated_at TEXT NOT NULL

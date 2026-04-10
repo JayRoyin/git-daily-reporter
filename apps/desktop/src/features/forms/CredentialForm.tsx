@@ -1,10 +1,9 @@
 import { useState } from "react";
 
 import { saveCredential } from "../credentials/api";
+import { discoverSshKeys, type DiscoveredSSHKey } from "../credentials/list-api";
 import type { Language } from "../i18n/i18n";
 import { messages } from "../i18n/i18n";
-import { saveSecret } from "../security/secure-store";
-import { useVault } from "../security/VaultContext";
 
 interface CredentialFormProps {
   language: Language;
@@ -13,38 +12,60 @@ interface CredentialFormProps {
 
 export function CredentialForm({ language, accountOptions }: CredentialFormProps) {
   const copy = messages[language];
-  const { isUnlocked, masterPassword } = useVault();
   const [accountId, setAccountId] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [credentialType, setCredentialType] = useState("ssh");
   const [usernameHint, setUsernameHint] = useState("");
   const [secretValue, setSecretValue] = useState("");
+  const [sourcePath, setSourcePath] = useState("");
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState("");
+  const [discoveredKeys, setDiscoveredKeys] = useState<DiscoveredSSHKey[]>([]);
 
   async function handleSave() {
-    if (!isUnlocked) {
-      setError(language === "zh" ? "请先解锁保险库" : "Unlock the vault first");
-      return;
+    try {
+      await saveCredential({
+        accountId,
+        displayName,
+        credentialType,
+        usernameHint,
+        secretValue,
+        sourcePath: sourcePath || undefined,
+      });
+      setError("");
+      setSaved(true);
+    } catch (err) {
+      setSaved(false);
+      setError(err instanceof Error ? err.message : "Unknown credential save error");
     }
+  }
 
-    const secretKey = `credential:${displayName || credentialType}`;
-    const secretRef = await saveSecret(masterPassword, secretKey, secretValue);
-    await saveCredential({
-      accountId,
-      displayName,
-      credentialType,
-      usernameHint,
-      secretRef,
-    });
-    setError("");
-    setSaved(true);
+  async function handleDiscoverSshKeys() {
+    try {
+      const keys = await discoverSshKeys();
+      setDiscoveredKeys(Array.isArray(keys) ? keys : []);
+      setError("");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unknown SSH discovery error");
+    }
+  }
+
+  function applyDiscoveredKey(item: DiscoveredSSHKey) {
+    setCredentialType("ssh");
+    setDisplayName(item.displayName);
+    setSourcePath(item.sourcePath);
+    setUsernameHint(item.usernameHint);
+    setSecretValue(item.secretValue);
   }
 
   return (
     <section className="form-card">
       <h3>{copy.credentialWorkspace}</h3>
-      <p>{copy.credentialSummary}</p>
+      <p>
+        {language === "zh"
+          ? "集中管理 SSH 私钥和访问令牌，默认只展示掩码信息。"
+          : "Manage SSH private keys and access tokens with masked display by default."}
+      </p>
 
       <div className="form-grid">
         <label className="form-field">
@@ -89,7 +110,16 @@ export function CredentialForm({ language, accountOptions }: CredentialFormProps
         </label>
 
         <label className="form-field">
-          <span>{language === "zh" ? "密钥内容" : "Secret value"}</span>
+          <span>{language === "zh" ? "来源路径" : "Source path"}</span>
+          <input
+            value={sourcePath}
+            onChange={(event) => setSourcePath(event.target.value)}
+            placeholder="~/.ssh/id_ed25519"
+          />
+        </label>
+
+        <label className="form-field">
+          <span>{language === "zh" ? "密钥或令牌内容" : "Secret value"}</span>
           <input
             type="password"
             value={secretValue}
@@ -99,9 +129,39 @@ export function CredentialForm({ language, accountOptions }: CredentialFormProps
         </label>
       </div>
 
-      <button className="form-action" type="button" onClick={handleSave}>
-        {language === "zh" ? "保存凭证" : "Save credential"}
-      </button>
+      <div className="button-row">
+        <button className="form-action secondary" type="button" onClick={handleDiscoverSshKeys}>
+          {language === "zh" ? "自动扫描 SSH 密钥" : "Discover SSH keys"}
+        </button>
+        <button className="form-action" type="button" onClick={handleSave}>
+          {language === "zh" ? "保存凭证" : "Save credential"}
+        </button>
+      </div>
+
+      {discoveredKeys.length ? (
+        <section className="summary-list">
+          <h3>{language === "zh" ? "已发现 SSH 密钥" : "Discovered SSH keys"}</h3>
+          {discoveredKeys.map((item) => (
+            <div key={item.sourcePath} className="provider-row">
+              <div>
+                <p>{item.displayName}</p>
+                <p>{item.sourcePath}</p>
+                <p>{item.secretMask}</p>
+              </div>
+              <div className="provider-actions">
+                <button
+                  className="form-action secondary compact"
+                  type="button"
+                  onClick={() => applyDiscoveredKey(item)}
+                >
+                  {language === "zh" ? "导入到表单" : "Use this key"}
+                </button>
+              </div>
+            </div>
+          ))}
+        </section>
+      ) : null}
+
       {error ? <p className="error-banner">{error}</p> : null}
       {saved ? <p className="save-banner">{language === "zh" ? "凭证已保存" : "Credential saved"}</p> : null}
     </section>

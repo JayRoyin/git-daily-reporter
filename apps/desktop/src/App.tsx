@@ -1,82 +1,137 @@
 import { useState } from "react";
 
 import { AboutPage } from "./features/about/AboutPage";
-import { FormsWorkspace } from "./features/forms/FormsWorkspace";
 import { messages, type Language } from "./features/i18n/i18n";
-import { ReportsWorkspace } from "./features/reports/ReportsWorkspace";
-import { SecurityShell } from "./features/security/SecurityShell";
-import { VaultProvider } from "./features/security/VaultContext";
-import { SettingsShell } from "./features/settings/SettingsShell";
+import { AccountsPage } from "./features/workbench/AccountsPage";
+import { CredentialsPage } from "./features/workbench/CredentialsPage";
+import { DashboardPage } from "./features/workbench/DashboardPage";
+import { ReportsPage } from "./features/workbench/ReportsPage";
+import { RepositoriesPage } from "./features/workbench/RepositoriesPage";
+import { useDesktopWorkspace } from "./features/forms/FormsWorkspace";
+
+type PageId =
+  | "dashboard"
+  | "accounts"
+  | "credentials"
+  | "repositories"
+  | "reports"
+  | "about";
+
+const NAV_ITEMS: Array<{ id: PageId; label: { zh: string; en: string }; icon: string }> = [
+  { id: "dashboard", label: { zh: "仪表盘", en: "Dashboard" }, icon: "▣" },
+  { id: "accounts", label: { zh: "账户管理", en: "Accounts" }, icon: "◉" },
+  { id: "credentials", label: { zh: "凭证管理", en: "Credentials" }, icon: "◆" },
+  { id: "repositories", label: { zh: "仓库管理", en: "Repositories" }, icon: "▤" },
+  { id: "reports", label: { zh: "报告中心", en: "Reports" }, icon: "◌" },
+  { id: "about", label: { zh: "关于", en: "About" }, icon: "◎" },
+];
 
 function App() {
-  const [language, setLanguage] = useState<Language>("en");
-  const [page, setPage] = useState<"workspace" | "about">("workspace");
+  const [language, setLanguage] = useState<Language>("zh");
+  const [page, setPage] = useState<PageId>("dashboard");
   const copy = messages[language];
+  const workspace = useDesktopWorkspace(language);
+
+  function renderPage() {
+    switch (page) {
+      case "accounts":
+        return (
+          <AccountsPage
+            language={language}
+            accounts={workspace.accounts}
+            onSaveAccount={workspace.handleSaveAccount}
+            saveMessage={workspace.savedState}
+          />
+        );
+      case "credentials":
+        return (
+          <CredentialsPage
+            language={language}
+            credentials={workspace.credentials}
+            accountOptions={workspace.accountOptions}
+          />
+        );
+      case "repositories":
+        return (
+          <RepositoriesPage
+            language={language}
+            repositories={workspace.repositories}
+            accountOptions={workspace.accountOptions}
+            credentialOptions={workspace.credentialOptions}
+          />
+        );
+      case "reports":
+        return <ReportsPage language={language} />;
+      case "about":
+        return <AboutPage language={language} />;
+      case "dashboard":
+      default:
+        return <DashboardPage language={language} />;
+    }
+  }
 
   return (
-    <VaultProvider>
-      <main className="shell">
-        <div className="toolbar" aria-label="global toolbar">
-          <button
-            className="about-link"
-            type="button"
-            onClick={() => setPage(page === "workspace" ? "about" : "workspace")}
-          >
-            {page === "workspace"
-              ? language === "zh"
-                ? "关于"
-                : "About"
-              : language === "zh"
-                ? "返回"
-                : "Back"}
-          </button>
-          <div className="language-toggle" role="group" aria-label="language switcher">
-            <button
-              className={`lang-button ${language === "en" ? "active" : ""}`}
-              type="button"
-              onClick={() => setLanguage("en")}
-            >
-              {copy.english}
-            </button>
-            <button
-              className={`lang-button ${language === "zh" ? "active" : ""}`}
-              type="button"
-              onClick={() => setLanguage("zh")}
-            >
-              {copy.chinese}
-            </button>
+    <main className="desktop-shell">
+      <header className="window-bar">
+        <div className="window-brand">
+          <span className="window-dot window-dot--red" />
+          <span className="window-dot window-dot--amber" />
+          <span className="window-dot window-dot--green" />
+          <div>
+            <strong>Git Daily Reporter</strong>
+            <span>{language === "zh" ? "开发者日报工作台" : "Developer report workbench"}</span>
           </div>
         </div>
+        <div className="language-toggle" role="group" aria-label="language switcher">
+          <button
+            className={`lang-button ${language === "en" ? "active" : ""}`}
+            type="button"
+            onClick={() => setLanguage("en")}
+          >
+            {copy.english}
+          </button>
+          <button
+            className={`lang-button ${language === "zh" ? "active" : ""}`}
+            type="button"
+            onClick={() => setLanguage("zh")}
+          >
+            {copy.chinese}
+          </button>
+        </div>
+      </header>
 
-        {page === "about" ? (
-          <AboutPage language={language} />
-        ) : (
-          <>
-            <section className="hero">
-              <p className="eyebrow">{copy.planningShell}</p>
-              <h1>Git Daily Reporter</h1>
-              <p className="summary">{copy.appSummary}</p>
-            </section>
+      <div className="workbench-layout">
+        <aside className="sidebar" aria-label="primary navigation">
+          <div className="sidebar-brand">
+            <p>{language === "zh" ? "Git 日报工作台" : "Git Report Desk"}</p>
+            <span>{language === "zh" ? "本地采集、总结与输出" : "Collect, summarize, and export locally"}</span>
+          </div>
 
-            <section className="status-grid" aria-label="project overview">
-              <article className="status-card">
-                <h2>Desktop</h2>
-                <p>{copy.desktopInitialized}</p>
-              </article>
-              <article className="status-card">
-                <h2>Next Phase</h2>
-                <p>{copy.nextPhase}</p>
-              </article>
-            </section>
+          <nav className="sidebar-nav">
+            {NAV_ITEMS.map((item) => {
+              const label = item.label[language];
+              const isActive = page === item.id;
 
-            <SettingsShell language={language} />
-            <SecurityShell language={language} />
-            <FormsWorkspace language={language} />
-            <ReportsWorkspace language={language} />
-          </>
-        )}
-      </main>
-    </VaultProvider>
+              return (
+                <button
+                  key={item.id}
+                  className={`nav-button ${isActive ? "active" : ""}`}
+                  type="button"
+                  onClick={() => setPage(item.id)}
+                >
+                  <span className="nav-icon" aria-hidden="true">
+                    {item.icon}
+                  </span>
+                  <span>{label}</span>
+                </button>
+              );
+            })}
+          </nav>
+        </aside>
+
+        <section className="content-shell">{renderPage()}</section>
+      </div>
+    </main>
   );
 }
 

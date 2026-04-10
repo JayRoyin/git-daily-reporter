@@ -1,3 +1,6 @@
+import { useState } from "react";
+
+import { revealSecret } from "../credentials/list-api";
 import type { Language } from "../i18n/i18n";
 import type { LLMProviderRecord } from "./provider-api";
 
@@ -16,8 +19,24 @@ export function ProviderList({
   onActivate,
   onDelete,
 }: ProviderListProps) {
+  const [revealed, setRevealed] = useState<Record<string, string>>({});
+
   if (!providers.length) {
     return null;
+  }
+
+  async function handleToggle(provider: LLMProviderRecord) {
+    if (revealed[provider.id]) {
+      setRevealed((current) => {
+        const next = { ...current };
+        delete next[provider.id];
+        return next;
+      });
+      return;
+    }
+
+    const result = await revealSecret(provider.apiKeyRef);
+    setRevealed((current) => ({ ...current, [provider.id]: result.value }));
   }
 
   return (
@@ -28,8 +47,22 @@ export function ProviderList({
           <div>
             <p>{provider.providerName}</p>
             <p>{provider.model}</p>
+            <p>{revealed[provider.id] ?? provider.apiKeyMask}</p>
           </div>
           <div className="provider-actions">
+            <button
+              className="form-action secondary compact"
+              type="button"
+              onClick={() => handleToggle(provider)}
+            >
+              {revealed[provider.id]
+                ? language === "zh"
+                  ? "隐藏"
+                  : "Hide"
+                : language === "zh"
+                  ? "显示"
+                  : "Reveal"}
+            </button>
             {activeProviderId === provider.id ? (
               <span className="chip chip--ok">
                 {language === "zh" ? "当前激活" : "Active"}

@@ -3,5 +3,5 @@
   "identifier": "default",
   "description": "Default capability for the desktop application shell.",
   "windows": ["main"],
-  "permissions": ["core:default", "stronghold:default"]
+  "permissions": ["core:default"]
 }

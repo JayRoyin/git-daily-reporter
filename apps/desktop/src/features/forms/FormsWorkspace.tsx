@@ -16,12 +16,7 @@ import { CredentialForm } from "./CredentialForm";
 import { RepositoryForm } from "./RepositoryForm";
 import { LLMSettingsForm } from "../llm/LLMSettingsForm";
 
-interface FormsWorkspaceProps {
-  language: Language;
-}
-
-export function FormsWorkspace({ language }: FormsWorkspaceProps) {
-  const copy = messages[language];
+export function useDesktopWorkspace(language: Language) {
   const [savedState, setSavedState] = useState<string>("");
   const [accounts, setAccounts] = useState<AccountRecord[]>([]);
   const [credentials, setCredentials] = useState<CredentialRecord[]>([]);
@@ -43,6 +38,8 @@ export function FormsWorkspace({ language }: FormsWorkspaceProps) {
   }, []);
 
   async function handleSaveAccount(payload: {
+    platform: string;
+    platformBaseUrl?: string;
     displayName: string;
     gitUsername: string;
     gitEmail: string;
@@ -53,26 +50,49 @@ export function FormsWorkspace({ language }: FormsWorkspaceProps) {
     setSavedState(language === "zh" ? "账户已保存" : "Account saved");
   }
 
+  return {
+    accounts,
+    credentials,
+    repositories,
+    savedState,
+    refreshData,
+    handleSaveAccount,
+    accountOptions: accounts.map((item) => ({
+      id: item.id,
+      label: `${item.displayName} [${item.platform}] (${item.gitEmail})`,
+    })),
+    credentialOptions: credentials.map((item) => ({
+      id: item.id,
+      label: `${item.displayName} [${item.type}]`,
+    })),
+  };
+}
+
+interface FormsWorkspaceProps {
+  language: Language;
+}
+
+export function FormsWorkspace({ language }: FormsWorkspaceProps) {
+  const copy = messages[language];
+  const {
+    repositories,
+    savedState,
+    handleSaveAccount,
+    accountOptions,
+    credentialOptions,
+  } = useDesktopWorkspace(language);
+
   return (
     <section className="forms-workspace" aria-label="forms workspace">
       <AccountForm language={language} onSave={handleSaveAccount} />
       <CredentialForm
         language={language}
-        accountOptions={accounts.map((item) => ({
-          id: item.id,
-          label: `${item.displayName} (${item.gitEmail})`,
-        }))}
+        accountOptions={accountOptions}
       />
       <RepositoryForm
         language={language}
-        accountOptions={accounts.map((item) => ({
-          id: item.id,
-          label: `${item.displayName} (${item.gitEmail})`,
-        }))}
-        credentialOptions={credentials.map((item) => ({
-          id: item.id,
-          label: `${item.displayName} [${item.type}]`,
-        }))}
+        accountOptions={accountOptions}
+        credentialOptions={credentialOptions}
       />
       {savedState ? <p className="save-banner">{savedState}</p> : null}
       <LLMSettingsForm language={language} />

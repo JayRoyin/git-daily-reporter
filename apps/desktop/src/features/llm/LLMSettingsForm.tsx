@@ -1,16 +1,16 @@
 import { useEffect, useState } from "react";
 
 import type { Language } from "../i18n/i18n";
-import { saveSecret } from "../security/secure-store";
-import { useVault } from "../security/VaultContext";
 import { testProviderConnection } from "./llm-client";
 import {
   deleteProvider,
+  fetchProviderModels,
   listProviders,
   saveProvider,
   setActiveProvider,
+  type LLMProviderRecord,
 } from "./provider-api";
-import { PROVIDER_PRESETS } from "./provider-presets";
+import { PROVIDER_PRESETS, modelsForProvider } from "./provider-presets";
 import { ProviderList } from "./ProviderList";
 
 interface LLMSettingsFormProps {
@@ -18,7 +18,6 @@ interface LLMSettingsFormProps {
 }
 
 export function LLMSettingsForm({ language }: LLMSettingsFormProps) {
-  const { isUnlocked, masterPassword } = useVault();
   const [providerName, setProviderName] = useState("");
   const [baseUrl, setBaseUrl] = useState("");
   const [model, setModel] = useState("");
@@ -26,57 +25,43 @@ export function LLMSettingsForm({ language }: LLMSettingsFormProps) {
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState("");
   const [connectionStatus, setConnectionStatus] = useState("");
-  const [providers, setProviders] = useState<any[]>([]);
+  const [providers, setProviders] = useState<LLMProviderRecord[]>([]);
   const [activeProviderId, setActiveProviderId] = useState("");
+  const [availableModels, setAvailableModels] = useState<string[]>([]);
 
   async function refreshProviders() {
     const items = await listProviders();
     const safeItems = Array.isArray(items) ? items : [];
     setProviders(safeItems);
-    if (!activeProviderId && safeItems.length) {
-      setActiveProviderId(safeItems[0].id);
-    }
+    const active = safeItems.find((item) => item.isActive);
+    setActiveProviderId(active?.id ?? safeItems[0]?.id ?? "");
   }
 
   async function handleSave() {
-    if (!isUnlocked) {
-      setError(language === "zh" ? "请先解锁保险库" : "Unlock the vault first");
-      return;
-    }
-
-    const apiKeyRef = await saveSecret(
-      masterPassword,
-      `llm:${providerName}:${model}`,
-      apiKey,
-    );
-
-    await saveProvider({
-      providerName,
-      baseUrl,
-      model,
-      apiKeyRef,
-    });
-    await refreshProviders();
-
-    setError("");
-    setSaved(true);
-  }
-
-  async function handleTestConnection() {
-    if (!isUnlocked) {
-      setError(language === "zh" ? "请先解锁保险库" : "Unlock the vault first");
-      return;
-    }
-
     try {
-      await testProviderConnection({
+      await saveProvider({
+        providerName,
         baseUrl,
         model,
         apiKey,
       });
-      setConnectionStatus(
-        language === "zh" ? "连接测试成功" : "Connection successful",
-      );
+      await refreshProviders();
+      setError("");
+      setSaved(true);
+    } catch (err) {
+      setSaved(false);
+      setError(err instanceof Error ? err.message : "Unknown provider save error");
+    }
+  }
+
+  async function handleTestConnection() {
+    try {
+      const result = await testProviderConnection({
+        baseUrl,
+        model,
+        apiKey,
+      });
+      setConnectionStatus(result.message);
       setError("");
     } catch (err) {
       setConnectionStatus("");
@@ -86,16 +71,12 @@ export function LLMSettingsForm({ language }: LLMSettingsFormProps) {
 
   async function handleActivate(providerId: string) {
     await setActiveProvider(providerId);
-    setActiveProviderId(providerId);
+    await refreshProviders();
   }
 
   async function handleDelete(providerId: string) {
     await deleteProvider(providerId);
-    const remaining = providers.filter((item) => item.id !== providerId);
-    setProviders(remaining);
-    if (activeProviderId === providerId) {
-      setActiveProviderId(remaining[0]?.id ?? "");
-    }
+    await refreshProviders();
   }
 
   useEffect(() => {
@@ -105,6 +86,11 @@ export function LLMSettingsForm({ language }: LLMSettingsFormProps) {
   return (
     <section className="form-card">
       <h3>{language === "zh" ? "LLM 提供方设置" : "LLM Provider Settings"}</h3>
+      <p>
+        {language === "zh"
+          ? "测试连接和 AI 总结请求都通过桌面端后端代理执行，不再依赖 WebView 内部网络栈。"
+          : "LLM connection tests and summary requests are executed through backend commands instead of the WebView network stack."}
+      </p>
       <div className="form-grid">
         <label className="form-field">
           <span>{language === "zh" ? "预设提供方" : "Preset provider"}</span>
@@ -116,6 +102,7 @@ export function LLMSettingsForm({ language }: LLMSettingsFormProps) {
               setProviderName(preset.label);
               setBaseUrl(preset.baseUrl);
               setModel(preset.modelHint);
+              setAvailableModels(preset.models);
             }}
           >
             <option value="">{language === "zh" ? "请选择预设" : "Select preset"}</option>
@@ -137,7 +124,14 @@ export function LLMSettingsForm({ language }: LLMSettingsFormProps) {
         </label>
         <label className="form-field">
           <span>{language === "zh" ? "模型" : "Model"}</span>
-          <input value={model} onChange={(event) => setModel(event.target.value)} />
+          <select value={model} onChange={(event) => setModel(event.target.value)}>
+            <option value="">{language === "zh" ? "请选择模型" : "Select model"}</option>
+            {(availableModels.length ? availableModels : modelsForProvider(providerName)).map((item) => (
+              <option key={item} value={item}>
+                {item}
+              </option>
+            ))}
+          </select>
         </label>
         <label className="form-field">
           <span>{language === "zh" ? "API 密钥" : "API key"}</span>
@@ -149,6 +143,24 @@ export function LLMSettingsForm({ language }: LLMSettingsFormProps) {
         </label>
       </div>
       <div className="button-row">
+        <button
+          className="form-action secondary"
+          type="button"
+          onClick={async () => {
+            try {
+              const result = await fetchProviderModels({ baseUrl, model, apiKey });
+              setAvailableModels(result.models);
+              setConnectionStatus(
+                language === "zh" ? "已更新模型列表" : "Model list refreshed",
+              );
+              setError("");
+            } catch (err) {
+              setError(err instanceof Error ? err.message : "Unknown model list error");
+            }
+          }}
+        >
+          {language === "zh" ? "获取模型列表" : "Fetch models"}
+        </button>
         <button className="form-action secondary" type="button" onClick={handleTestConnection}>
           {language === "zh" ? "测试连接" : "Test connection"}
         </button>
