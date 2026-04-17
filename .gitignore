@@ -1,7 +1,7 @@
 __pycache__/
 .pytest_cache/
 .venv/
-reports/
+/reports/
 .worktrees/
 apps/desktop/node_modules/
 apps/desktop/dist/

@@ -69,17 +69,17 @@ Python CLI 仅作为参考实现，不作为最终桌面客户端架构。
 
 ## 文档
 
-- 总体方案: [方案设计.md](/home/qstdc/Royin_Project/git-daily-reporter/docs/方案设计.md)
-- 详细技术设计: [详细技术设计.md](/home/qstdc/Royin_Project/git-daily-reporter/docs/详细技术设计.md)
-- 客户端实施计划: [实施计划.md](/home/qstdc/Royin_Project/git-daily-reporter/docs/实施计划.md)
-- 按版本执行计划: [版本执行计划.md](/home/qstdc/Royin_Project/git-daily-reporter/docs/版本执行计划.md)
-- 开发环境建议: [开发环境建议.md](/home/qstdc/Royin_Project/git-daily-reporter/docs/开发环境建议.md)
-- 桌面端工作区说明: [apps/desktop/README.md](/home/qstdc/Royin_Project/git-daily-reporter/.worktrees/phase-v0-2-desktop-init/apps/desktop/README.md)
+- 总体方案: [docs/方案设计.md](docs/方案设计.md)
+- 详细技术设计: [docs/详细技术设计.md](docs/详细技术设计.md)
+- 客户端实施计划: [docs/实施计划.md](docs/实施计划.md)
+- 按版本执行计划: [docs/版本执行计划.md](docs/版本执行计划.md)
+- 开发环境建议: [docs/开发环境建议.md](docs/开发环境建议.md)
+- 桌面端工作区说明: [apps/desktop/README.md](apps/desktop/README.md)
 
 ## 启动方式
 
 ```bash
-cd /home/qstdc/Royin_Project/git-daily-reporter/.worktrees/phase-v0-2-desktop-init/apps/desktop
+cd apps/desktop
 npm install
 npm run tauri dev
 ```
@@ -107,11 +107,11 @@ npm run tauri dev
 - 插件成熟
 - 更适合当前这种多技术栈、快速演进的项目
 
-详细建议见 [开发环境建议.md](/home/qstdc/Royin_Project/git-daily-reporter/docs/开发环境建议.md)。
+详细建议见 [docs/开发环境建议.md](docs/开发环境建议.md)。
 
 ## 开源协议
 
-本项目当前使用 [MIT License](/home/qstdc/Royin_Project/git-daily-reporter/LICENSE)。
+本项目当前使用 [MIT License](LICENSE)。
 
 ## 当前边界
 
@@ -121,4 +121,4 @@ npm run tauri dev
 - 以本地 Git 仓库为主的日报生成
 - API 形式接入外部 LLM
 
-后续增强方向见 [版本执行计划.md](/home/qstdc/Royin_Project/git-daily-reporter/docs/版本执行计划.md)。
+后续增强方向见 [docs/版本执行计划.md](docs/版本执行计划.md)。
