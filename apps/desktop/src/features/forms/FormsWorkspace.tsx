@@ -77,6 +77,7 @@ export function FormsWorkspace({ language }: FormsWorkspaceProps) {
   const {
     repositories,
     savedState,
+    refreshData,
     handleSaveAccount,
     accountOptions,
     credentialOptions,
@@ -88,11 +89,13 @@ export function FormsWorkspace({ language }: FormsWorkspaceProps) {
       <CredentialForm
         language={language}
         accountOptions={accountOptions}
+        onSaved={refreshData}
       />
       <RepositoryForm
         language={language}
         accountOptions={accountOptions}
         credentialOptions={credentialOptions}
+        onSaved={refreshData}
       />
       {savedState ? <p className="save-banner">{savedState}</p> : null}
       <LLMSettingsForm language={language} />

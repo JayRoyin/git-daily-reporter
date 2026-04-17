@@ -1,13 +1,13 @@
 import { useState } from "react";
 
 import { AboutPage } from "./features/about/AboutPage";
+import { useDesktopWorkspace } from "./features/forms/FormsWorkspace";
 import { messages, type Language } from "./features/i18n/i18n";
 import { AccountsPage } from "./features/workbench/AccountsPage";
 import { CredentialsPage } from "./features/workbench/CredentialsPage";
 import { DashboardPage } from "./features/workbench/DashboardPage";
 import { ReportsPage } from "./features/workbench/ReportsPage";
 import { RepositoriesPage } from "./features/workbench/RepositoriesPage";
-import { useDesktopWorkspace } from "./features/forms/FormsWorkspace";
 
 type PageId =
   | "dashboard"
@@ -19,10 +19,10 @@ type PageId =
 
 const NAV_ITEMS: Array<{ id: PageId; label: { zh: string; en: string }; icon: string }> = [
   { id: "dashboard", label: { zh: "仪表盘", en: "Dashboard" }, icon: "▣" },
-  { id: "accounts", label: { zh: "账户管理", en: "Accounts" }, icon: "◉" },
-  { id: "credentials", label: { zh: "凭证管理", en: "Credentials" }, icon: "◆" },
-  { id: "repositories", label: { zh: "仓库管理", en: "Repositories" }, icon: "▤" },
-  { id: "reports", label: { zh: "报告中心", en: "Reports" }, icon: "◌" },
+  { id: "accounts", label: { zh: "账户管理", en: "Accounts" }, icon: "◎" },
+  { id: "credentials", label: { zh: "凭证管理", en: "Credentials" }, icon: "◎" },
+  { id: "repositories", label: { zh: "仓库管理", en: "Repositories" }, icon: "▣" },
+  { id: "reports", label: { zh: "报告中心", en: "Reports" }, icon: "◎" },
   { id: "about", label: { zh: "关于", en: "About" }, icon: "◎" },
 ];
 
@@ -49,6 +49,7 @@ function App() {
             language={language}
             credentials={workspace.credentials}
             accountOptions={workspace.accountOptions}
+            onSavedCredential={workspace.refreshData}
           />
         );
       case "repositories":
@@ -58,6 +59,7 @@ function App() {
             repositories={workspace.repositories}
             accountOptions={workspace.accountOptions}
             credentialOptions={workspace.credentialOptions}
+            onSavedRepository={workspace.refreshData}
           />
         );
       case "reports":

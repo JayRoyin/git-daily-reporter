@@ -1,4 +1,4 @@
-import { invoke } from "@tauri-apps/api/core";
+import { invokeOrDefault } from "../../lib/tauri";
 
 export interface RepositoryRecord {
   id: string;
@@ -10,5 +10,5 @@ export interface RepositoryRecord {
 }
 
 export async function listRepositories() {
-  return invoke<RepositoryRecord[]>("list_repositories");
+  return invokeOrDefault<RepositoryRecord[]>("list_repositories", []);
 }

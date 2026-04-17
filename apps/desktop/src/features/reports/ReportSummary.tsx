@@ -1,5 +1,6 @@
 import { useState } from "react";
 
+import { describeError } from "../../lib/errors";
 import type { Language } from "../i18n/i18n";
 import { summarizeReport } from "../llm/llm-client";
 
@@ -23,7 +24,7 @@ export function ReportSummary({
       setSummary(result);
       setError("");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Unknown LLM error");
+      setError(describeError(err, "Unknown LLM error"));
     }
   }
 

@@ -1,9 +1,8 @@
-import { invoke } from "@tauri-apps/api/core";
-
 import { testProviderConnection as testProviderConnectionCommand } from "./provider-api";
+import { invokeOrThrow } from "../../lib/tauri";
 
 export async function summarizeReport(reportContent: string) {
-  return invoke<string>("generate_llm_summary", { reportContent });
+  return invokeOrThrow<string>("generate_llm_summary", { reportContent });
 }
 
 export async function testProviderConnection(input: {

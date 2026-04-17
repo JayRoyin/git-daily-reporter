@@ -1,4 +1,4 @@
-import { invoke } from "@tauri-apps/api/core";
+import { invokeOrDefault, invokeOrThrow } from "../../lib/tauri";
 
 export interface GenerateReportPayload {
   repositoryId: string;
@@ -19,9 +19,9 @@ export interface ReportRunRecord {
 }
 
 export async function generateReport(payload: GenerateReportPayload) {
-  return invoke<GenerateReportResult>("generate_report", { payload });
+  return invokeOrThrow<GenerateReportResult>("generate_report", { payload });
 }
 
 export async function listReportRuns() {
-  return invoke<ReportRunRecord[]>("list_report_runs");
+  return invokeOrDefault<ReportRunRecord[]>("list_report_runs", []);
 }

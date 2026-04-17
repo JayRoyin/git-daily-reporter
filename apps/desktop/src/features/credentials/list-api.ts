@@ -1,4 +1,4 @@
-import { invoke } from "@tauri-apps/api/core";
+import { invokeOrDefault, invokeOrThrow } from "../../lib/tauri";
 
 export interface CredentialRecord {
   id: string;
@@ -25,13 +25,13 @@ export interface RevealSecretResult {
 }
 
 export async function listCredentials() {
-  return invoke<CredentialRecord[]>("list_credentials");
+  return invokeOrDefault<CredentialRecord[]>("list_credentials", []);
 }
 
 export async function discoverSshKeys() {
-  return invoke<DiscoveredSSHKey[]>("discover_ssh_keys");
+  return invokeOrDefault<DiscoveredSSHKey[]>("discover_ssh_keys", []);
 }
 
 export async function revealSecret(secretRef: string) {
-  return invoke<RevealSecretResult>("reveal_secret", { payload: { secretRef } });
+  return invokeOrThrow<RevealSecretResult>("reveal_secret", { payload: { secretRef } });
 }

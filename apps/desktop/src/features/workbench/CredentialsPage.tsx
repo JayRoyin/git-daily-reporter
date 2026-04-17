@@ -9,12 +9,14 @@ interface CredentialsPageProps {
   language: Language;
   credentials: CredentialRecord[];
   accountOptions: Array<{ id: string; label: string }>;
+  onSavedCredential?: () => Promise<void> | void;
 }
 
 export function CredentialsPage({
   language,
   credentials,
   accountOptions,
+  onSavedCredential,
 }: CredentialsPageProps) {
   const [revealed, setRevealed] = useState<Record<string, string>>({});
 
@@ -44,7 +46,11 @@ export function CredentialsPage({
         </p>
       </header>
 
-      <CredentialForm language={language} accountOptions={accountOptions} />
+      <CredentialForm
+        language={language}
+        accountOptions={accountOptions}
+        onSaved={onSavedCredential}
+      />
       <LLMSettingsForm language={language} />
 
       <section className="workspace-panel">

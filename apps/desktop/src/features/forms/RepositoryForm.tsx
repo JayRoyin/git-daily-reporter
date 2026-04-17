@@ -8,12 +8,14 @@ interface RepositoryFormProps {
   language: Language;
   accountOptions: Array<{ id: string; label: string }>;
   credentialOptions: Array<{ id: string; label: string }>;
+  onSaved?: () => Promise<void> | void;
 }
 
 export function RepositoryForm({
   language,
   accountOptions,
   credentialOptions,
+  onSaved,
 }: RepositoryFormProps) {
   const copy = messages[language];
   const [accountId, setAccountId] = useState("");
@@ -35,6 +37,7 @@ export function RepositoryForm({
       defaultBranch,
       authorFilterValue,
     });
+    await onSaved?.();
     setSaved(true);
   }
 

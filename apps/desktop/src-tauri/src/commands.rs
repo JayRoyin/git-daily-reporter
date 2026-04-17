@@ -849,19 +849,28 @@ pub fn generate_report(
         },
         body
     );
-    let output_path = format!("/tmp/{}-{}.md", payload.repository_id, payload.report_date);
+    let reports_dir = state.app_data_dir.join("reports");
+    fs::create_dir_all(&reports_dir).map_err(|error| error.to_string())?;
+    let output_path = reports_dir.join(format!(
+        "{}-{}.md",
+        payload.repository_id, payload.report_date
+    ));
     std::fs::write(&output_path, &content).map_err(|error| error.to_string())?;
+    let output_path_string = output_path.to_string_lossy().to_string();
 
     db.save_report_run(
         &unique_id("run"),
         &payload.repository_id,
         &payload.report_date,
-        &output_path,
+        &output_path_string,
         &content,
     )
     .map_err(|error| error.to_string())?;
 
-    Ok(GenerateReportResult { output_path, content })
+    Ok(GenerateReportResult {
+        output_path: output_path_string,
+        content,
+    })
 }
 
 #[tauri::command]

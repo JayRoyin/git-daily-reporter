@@ -1,4 +1,4 @@
-import { invoke } from "@tauri-apps/api/core";
+import { invokeOrThrow } from "../../lib/tauri";
 
 export interface SaveRepositoryPayload {
   accountId: string;
@@ -11,5 +11,5 @@ export interface SaveRepositoryPayload {
 }
 
 export async function saveRepository(payload: SaveRepositoryPayload) {
-  return invoke<{ id: string }>("save_repository", { payload });
+  return invokeOrThrow<{ id: string }>("save_repository", { payload });
 }

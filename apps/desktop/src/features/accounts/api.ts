@@ -1,4 +1,4 @@
-import { invoke } from "@tauri-apps/api/core";
+import { invokeOrDefault, invokeOrThrow } from "../../lib/tauri";
 
 export interface SaveAccountPayload {
   platform: string;
@@ -56,18 +56,24 @@ export const PLATFORM_OPTIONS: PlatformOption[] = [
 ];
 
 export async function saveAccount(payload: SaveAccountPayload) {
-  return invoke<AccountRecord>("save_account", { payload });
+  return invokeOrThrow<AccountRecord>("save_account", { payload });
 }
 
 export async function listAccounts() {
-  return invoke<AccountRecord[]>("list_accounts");
+  return invokeOrDefault<AccountRecord[]>("list_accounts", []);
 }
 
 export async function verifyAccount(payload: VerifyAccountPayload) {
-  return invoke<AccountVerificationResult>("verify_account", { payload });
+  return invokeOrThrow<AccountVerificationResult>("verify_account", { payload });
 }
 
 export async function readGitIdentity() {
-  const result = await invoke<AccountVerificationResult>("read_git_identity");
+  const result = await invokeOrDefault<AccountVerificationResult>("read_git_identity", {
+    status: "ok",
+    message: JSON.stringify({
+      gitUsername: "",
+      gitEmail: "",
+    }),
+  });
   return JSON.parse(result.message) as GitIdentitySuggestion;
 }

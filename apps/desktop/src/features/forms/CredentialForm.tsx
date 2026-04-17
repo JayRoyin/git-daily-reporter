@@ -8,9 +8,10 @@ import { messages } from "../i18n/i18n";
 interface CredentialFormProps {
   language: Language;
   accountOptions: Array<{ id: string; label: string }>;
+  onSaved?: () => Promise<void> | void;
 }
 
-export function CredentialForm({ language, accountOptions }: CredentialFormProps) {
+export function CredentialForm({ language, accountOptions, onSaved }: CredentialFormProps) {
   const copy = messages[language];
   const [accountId, setAccountId] = useState("");
   const [displayName, setDisplayName] = useState("");
@@ -32,6 +33,7 @@ export function CredentialForm({ language, accountOptions }: CredentialFormProps
         secretValue,
         sourcePath: sourcePath || undefined,
       });
+      await onSaved?.();
       setError("");
       setSaved(true);
     } catch (err) {

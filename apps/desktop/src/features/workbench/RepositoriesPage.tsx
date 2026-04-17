@@ -7,6 +7,7 @@ interface RepositoriesPageProps {
   repositories: RepositoryRecord[];
   accountOptions: Array<{ id: string; label: string }>;
   credentialOptions: Array<{ id: string; label: string }>;
+  onSavedRepository?: () => Promise<void> | void;
 }
 
 export function RepositoriesPage({
@@ -14,6 +15,7 @@ export function RepositoriesPage({
   repositories,
   accountOptions,
   credentialOptions,
+  onSavedRepository,
 }: RepositoriesPageProps) {
   return (
     <section className="page-stack">
@@ -31,6 +33,7 @@ export function RepositoriesPage({
         language={language}
         accountOptions={accountOptions}
         credentialOptions={credentialOptions}
+        onSaved={onSavedRepository}
       />
 
       <section className="workspace-panel">

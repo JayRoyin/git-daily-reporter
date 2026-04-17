@@ -1,4 +1,4 @@
-import { invoke } from "@tauri-apps/api/core";
+import { invokeOrDefault, invokeOrThrow } from "../../lib/tauri";
 
 export interface SaveProviderPayload {
   providerName: string;
@@ -35,25 +35,25 @@ export interface LLMProviderRecord {
 }
 
 export async function saveProvider(payload: SaveProviderPayload) {
-  return invoke<{ id: string }>("save_llm_provider", { payload });
+  return invokeOrThrow<{ id: string }>("save_llm_provider", { payload });
 }
 
 export async function listProviders() {
-  return invoke<LLMProviderRecord[]>("list_llm_providers");
+  return invokeOrDefault<LLMProviderRecord[]>("list_llm_providers", []);
 }
 
 export async function setActiveProvider(providerId: string) {
-  return invoke("set_active_llm_provider", { providerId });
+  return invokeOrThrow("set_active_llm_provider", { providerId });
 }
 
 export async function deleteProvider(providerId: string) {
-  return invoke("delete_llm_provider", { providerId });
+  return invokeOrThrow("delete_llm_provider", { providerId });
 }
 
 export async function testProviderConnection(payload: TestProviderPayload) {
-  return invoke<ProviderTestResult>("test_llm_provider", { payload });
+  return invokeOrThrow<ProviderTestResult>("test_llm_provider", { payload });
 }
 
 export async function fetchProviderModels(payload: TestProviderPayload) {
-  return invoke<ProviderModelsResult>("fetch_llm_models", { payload });
+  return invokeOrThrow<ProviderModelsResult>("fetch_llm_models", { payload });
 }
